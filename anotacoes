@@ -1,0 +1,10 @@
+Api com NodeJs e MongoDB
+
+  Iniciando com rotas
+    - inicializar um package.json no projeto: npm init -y
+    - criar o arquivo server.js
+    - inicio com o módulo nativo do próprio node (sem o express)
+      - utilização do require ao invés de import
+      - a porta de início está estática, mas depois vai utilizar uma variável de ambiente que define a porta na web
+      
+  Servidor local e nodemoon
