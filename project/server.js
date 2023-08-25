@@ -1,15 +1,9 @@
-// constante com o módulo nativo http
-const http = require("http")
+// importa do app com o express
+import app from './src/app.js'
 // definição da porta que "escuta" a requisição -> local
-const port = 3000;
+const port = process.env.PORT || 3000; // a porta vem de algum servidor de uma plataforma ou localmente
 
-// "criando" o servidor que representa as requisições e respostas
-const server = http.createServer( (req, res) => {
-  res.writeHead(200, {'Contet-Type': 'text/plain'});  // resposta devolvida em formato de texto
-  res.end('Curso de node');                           // mensagem enviada
-})
-
-// definição da porta em que o servidor vai funcionar
-server.listen(port, () => {
+// definição da porta em que o servidor vai funcionar -> agora com o app importado
+app.listen(port, () => {
   console.log(`Servidor escutando em http://localhost:${port}`);
 })
