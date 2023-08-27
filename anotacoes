@@ -7,4 +7,118 @@ Api com NodeJs e MongoDB
       - utilização do require ao invés de import
       - a porta de início está estática, mas depois vai utilizar uma variável de ambiente que define a porta na web
       
-  Servidor local e nodemoon
+  Servidor local e nodemon
+    - implementação das rotas de serviço
+    - fazemos um objeto com as rotas definidas e cada uma com a mensagem que irá jogar na página
+    - o servidor deve pegar a url em que o usuário está através da sua request e printar na tela o que foi definido no objeto
+    - *** se atentar nas funcionalidade do req e do res ***
+    - quando atualizamos dados no servidor precisamos recarrega-lo para as atualizações fazer efeito
+      - para ajustar isso podemos utilizar o nodemon -> live reload da página -> todas as alterações no arquivo já fazem alteração em tempo real
+      - npm install --save-dev nodemon -> instalando a dependencia como desenvolvimento
+      - para utilização, devemos atualizar o package.json
+        - criar um script para rodar direto toda vez que precisarmos
+        - dentro de "script" : "dev": "nodemon server.js"
+        - podemos utilizar agora como npm run dev
+        - agora sempre que o projeto é salvo, o servidor se atualiza e faz o reload automatico
+
+  Express
+    - para aplicações robustas onde são necessários os verbos http como get e post podemos utilizar um framework que facilita e padroniza esse trabalho
+    - o express é considerado rápido, minimalista e dá liberdade ao desenvolvedor escrever do jeito que prefere
+    - instalação do express para utilização
+      - npm install express
+    - padronização de código
+      - pasta src com o app.js dentro
+    - moldagem da api com o express
+      - importação do express 
+      - fazendo uma variável app que recebe o express podemos utilizar todas as extensoes do framework
+      - aplicamos o metódo get para pegar qual url o usuário está
+        - caso esteja em / -> retorna uma mensagem
+        - caso esteja no /livros -> retorna um json com os livros
+    - REFORMULAÇÃO do server.js -> tirando todos os arquivos estáticos
+      - tirando os livros estáticos e o createServer do http que antes era feito na mão
+      - a porta deve receber requisições de alguma plataforma ou do localhost3000 -> const port = process.env.PORT || 3000;
+      - com a importação do app, não trabalhamos mais com a variável server para as requisições
+      - o express também tem a função de listen -> app.listen
+    - *** Formamos assim um ENCAPSULAMENTO - SRP ***
+      - funcionalidades bem definidas
+        - server só inicializa o servidor e fica "escutando" requisições
+        - o app faz a implementação das rotas
+
+  *** npm install express-generator -g -> criar um esqueleto express para não fazer do 0 como nesse projeto ***
+
+  Projeto livraria
+    - o intuito é fazer toda uma api no contexto de livraria
+      - serguindo boas práticas e padrão REST
+      - URI -> identificador único para os livros
+      - rodar no servidor local -> porta 3000
+      - usar os métodos http para executar as operações necessárias
+        - CRUD (Create, Read, Update, Delete)
+          - POST   -> método Create na API de livros para cadastrar um novo livro -> POST http//localhost:3000/livros
+          - GET    -> método Read na API, pode ser um livro específico ou todos os livros -> GET http//localhost:3000/livros/{id}
+          - PUT    -> método Update na API, editar informações de um livro -> PUT http//localhost:3000/livros/{id}
+          - DELETE -> método Delete na API, exclui um livro -> DELETE http//localhost:3000/livros
+      - no arquivo app vamos criar os novos métodos
+        - POST -> pega o body da requisição faz um push na lista de livros e manda uma mensagem de sucesso
+          - utilização do *postman* para fazer as requisições
+            - postman é muito utilizado para fazer testes de API -> é muito verboso fazer teste do tipo post por exemplo na mão
+            - ao abri-lo ele funciona como abas de um navegador
+            - colocamos qual tipo de requisição vamos fazer e em qual URL
+            - fica bem mais simples a visualização e manipulação -> sintax highlight, mexer nos objetos, status da resposta, tempo, tamanho
+            - para fazer o POST -> seleciona POST -> body -> raw -> formato json -> escreve o novo conteúdo -> send
+            - fazendo direto assim o conteúdo vai aparecer como null -> o código não está lendo json
+              - app.use(express.json()); -> interpretação do que vem por POST ou PUT para manipulação no código
+      - *REQUISIÇÕES DE POST E GET = DONE*
+
+  Evoluindo as rotas
+    - implementação do método PUT
+      - a atualização é feita em cima de um id
+      - precisa procurar na lista de objetos esse id
+      - o id é encontrado através de uma função com findIndex em cima de livros retornando aquele objeto em especifico
+      - assim é possível encontrar o livro que se deseja alterar e fazer a alteração a partir do id
+    - implementação do Delete
+      - achar o index do objeto a partir do id passado na url
+      - da um splice naquele objeto indicando o index e quantos objetos quer deletar
+
+  Banco relacional x NoSQL
+    - conseguimos fazer o CRUD mas os dados não estão *persistentes*
+  
+  MongoDB
+    - MongoDB atlas -> serviço em nuvem
+    - utilização do mongoose para interação com o banco 
+      - necessaria configuração do banco -> novo pacote: config
+    - Incluindo o Schema do banco
+      - link do banco com o esquema de livros para conseguir fazer inserções e leituras do banco
+      - nova pasta: models -> onde ficarão concentrados os modelos que representam uma coleção do banco
+        - tudo relacionado a regra de negocio
+        - utilização do padrão de um modelo de livro com letra inicial maiuscula
+  
+  Evolução do método Get
+    - arrumando a arquitetura -> não podemos deixar todos métodos de requisição em um arquivo
+    - utilização do padrão de projeto *controller*
+    - ter a definição de um arquivo de rota pra cada requisição
+    - arquivo routes
+      - de acordo com cada rota da api ele que lida com cada funcionalidade do CRUD que será chamada dentro do controller
+    - todas funcionalidades atualizadas -> encapsulamento de função -> CRUD dentro do controller
+    - model -> modelos de "objetos"
+    - o projeto segue o modelo MVC -> model view controller -> sepação de funcionalidades a partir de um mondelo
+
+  Novo Schema
+    - podemos fazer associação de dados -> mantendo a ideia de ter somente um controlador
+    - fizemos um novo modelo autores, uma rota para as requisições dele e um controller com o mesmo CRUD de livros
+  
+  Associação de dados entre Schemas
+    - temos as entidades autor e livro -> podemos fazer associação entre as duas
+    - ao cadastrar um livro ao invés de colocar seu nome podemos colocar um id
+    - sempre que puxar um livro, também mostrar as informações de autor
+    - alteração do Modelo livro
+      - mudar o tipo de autor para mongoose.Schema.Types.ObjectId -> agora ele vai ser o Id de um modelo
+      - inserção do parametro ref -> esse id é uma referencia a que modelo?
+    - alteração do Controller dos livros
+      - utilização do populate quando for listar os livros -> assim conseguimos printar informações do autor junto
+      - passa como parametro do populate a propriedade que queremos popular seguido de quais elementos irão aparecer
+      - 
+
+  Consultas personalizadas
+    - programação de uma busca a partir de uma parametro especifico dos livros
+    - fazer o busca na url
+    - se preocupar com as *rotas* -> sempre colocar da MAIS especifica para a MENOS especifica
